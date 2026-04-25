@@ -20,14 +20,16 @@ module registers #(
 
     for (i = 0; i < ADDR_WIDTH; i++) begin : g_register_array
 
-      assign reg_cs[i] = (reg_wr_addr == i);
+      // contents of x0 register is fixed to zeroes
+      assign reg_cs[i] = i == 0 ? 0 : (reg_wr_addr == i);
 
       register #(
-          .DATA_WIDTH(DATA_WIDTH)
+          .DATA_WIDTH(DATA_WIDTH),
+          .INIT_VAL  (0)
       ) register_inst (
           .clk(clk),
           .data_in(data_in),
-          .cs(reg_cs),
+          .cs(reg_cs[i]),
           .data_out(reg_data_out_arr[i])
       );
 
