@@ -23,3 +23,4 @@ async def gen_clk(dut: Register):
 async def tb_registers(dut: Register):
 
     cocotb.start_soon(gen_clk(dut))
+    
