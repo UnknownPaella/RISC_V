@@ -7,7 +7,8 @@ module register #(
     input clk,
     input rst,
     input [DATA_WIDTH - 1 : 0] data_in,
-    input cs,
+    input wr,
+    input rd,
     output logic [DATA_WIDTH - 1 : 0] data_out
 );
 
@@ -16,12 +17,12 @@ module register #(
   always_ff @(posedge clk, posedge rst) begin
     if (rst) begin
       data_tmp <= 0;
-    end else if (cs) begin
+    end else if (wr) begin
       data_tmp <= data_in;
     end
 
   end
 
-  assign data_out = data_tmp;
+  assign data_out = rd ? data_tmp : 'Z;
 
 endmodule
