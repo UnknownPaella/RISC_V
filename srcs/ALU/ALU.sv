@@ -26,6 +26,13 @@ module ALU #(
   logic [DATA_WIDTH - 1 : 0] rs2_data_reg;  // rs2 hold register
   logic [DATA_WIDTH - 1 : 0] addr_out_reg;  // adder output register
 
+  logic shift_dir = 0;
+  logic logicOrArith = 0;
+  logic [4 : 0] shamt = 0;
+  logic [DATA_WIDTH - 1 : 0] shifter_out_reg;
+
+  logic [DATA_WIDTH - 1 : 0] logicComb_out_reg;
+
   always_ff @(posedge clk) begin : sign_extend_immediate
     if (enable) begin
       imm_ext[DATA_WIDTH-1 : IMM_WIDTH] <= {(DATA_WIDTH - IMM_WIDTH) {imm[IMM_WIDTH-1]}};
@@ -42,11 +49,12 @@ module ALU #(
 
   always_ff @(posedge clk) begin : blockName
     if (enable) begin
-        
+
     end
   end
 
   // adding and subtracting module
+  // requires 2 cycles
   adder #(
       .DATA_WIDTH(DATA_WIDTH)
   ) adder_inst (
@@ -55,6 +63,30 @@ module ALU #(
       .b(rs2_data_reg),
       .addOrSub(subOrSra),
       .f(adder_out_reg)
+  );
+
+  // shift left/right logical/arithmetic module
+  // requires 2 cycles
+  shifter #(
+      .DATA_WIDTH(DATA_WIDTH)
+  ) shifter_inst (
+      .clk(clk),
+      .shift_dir(shift_dir),
+      .logicOrArith(logicOrArith),
+      .shamt(shamt),
+      .sh_data(rs1_data_reg),
+      .sh_output(shifter_out_reg)
+  );
+
+  logicComb # (
+    .DATA_WIDTH(DATA_WIDTH)
+  )
+  logicComb_inst (
+    .clk(clk),
+    .a(rs1_data_reg),
+    .b(rs2_data_reg),
+    .funct3(funct3),
+    .f(logicComb_out_reg)
   );
 
 endmodule

@@ -10,16 +10,20 @@ module shifter #(
     output [DATA_WIDTH - 1 : 0] sh_output
 );
 
+  logic [DATA_WIDTH - 1 : 0] sh_in_reg;
   logic [DATA_WIDTH - 1 : 0] sh_out_reg;
 
   always_ff @(posedge clk) begin
+
+    sh_in_reg <= sh_data;
+
     if (shift_dir == 0) begin
-      sh_out_reg <= sh_data << shamt;
+      sh_out_reg <= sh_in_reg << shamt;
     end else begin
       if (logicOrArith == 0) begin
-        sh_out_reg <= sh_data >> shamt;
+        sh_out_reg <= sh_in_reg >> shamt;
       end else begin
-        sh_out_reg <= sh_data >>> shamt;
+        sh_out_reg <= sh_in_reg >>> shamt;
       end
     end
   end
