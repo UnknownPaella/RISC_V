@@ -27,7 +27,6 @@ module ALU #(
   logic [DATA_WIDTH - 1 : 0] addr_out_reg;  // adder output register
 
   logic shift_dir = 0;
-  logic logicOrArith = 0;
   logic [4 : 0] shamt = 0;
   logic [DATA_WIDTH - 1 : 0] shifter_out_reg;
 
@@ -72,7 +71,7 @@ module ALU #(
   ) shifter_inst (
       .clk(clk),
       .shift_dir(shift_dir),
-      .logicOrArith(logicOrArith),
+      .logicOrArith(subOrSra),
       .shamt(shamt),
       .sh_data(rs1_data_reg),
       .sh_output(shifter_out_reg)
