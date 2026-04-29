@@ -1,3 +1,5 @@
+`include "../other/RV_inst_types.sv"
+`include "../other/RV32I_list.sv"
 import RV32I_list::*;
 
 module logicComb #(

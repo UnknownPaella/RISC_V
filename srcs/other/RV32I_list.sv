@@ -1,4 +1,5 @@
 
+`include "./RV32I_list.sv"
 import RV_inst_types::*;
 
 package RV32I_list;

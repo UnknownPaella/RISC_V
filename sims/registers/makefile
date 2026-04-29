@@ -4,8 +4,6 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 
-$(info text..)
-$(info $(PYTHON_BIN))
 
 VERILOG_SOURCES += ../../srcs/registers/registers.sv
 VERILOG_SOURCES += ../../srcs/registers/register.sv

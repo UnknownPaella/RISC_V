@@ -14,8 +14,7 @@ module ALU #(
     input enable,
     input [2 : 0] funct3,
     input subOrSra,
-    output [REG_ADDR_WIDTH - 1 : 0] rs1_addr,
-    output [REG_ADDR_WIDTH - 1 : 0] rs2_addr,
+    output [DATA_WIDTH - 1 : 0] rd_data,
     output alu_status,
     output done
 
@@ -28,9 +27,14 @@ module ALU #(
 
   logic shift_dir = 0;
   logic [4 : 0] shamt = 0;
-  logic [DATA_WIDTH - 1 : 0] shifter_out_reg;
+  logic [DATA_WIDTH - 1 : 0] shifter_out_reg = 0;
 
-  logic [DATA_WIDTH - 1 : 0] logicComb_out_reg;
+  logic [DATA_WIDTH - 1 : 0] logicComb_out_reg = 0;
+
+  logic signComp = 0;
+  logic [DATA_WIDTH - 1 : 0] comp_out_reg = 0;
+
+  logic [DATA_WIDTH - 1 : 0] rd_data_reg = 0;
 
   always_ff @(posedge clk) begin : sign_extend_immediate
     if (enable) begin
@@ -47,8 +51,28 @@ module ALU #(
   end
 
   always_ff @(posedge clk) begin : blockName
-    if (enable) begin
+    case (funct3)
+      ADDSUB_FN3, ADDSUBI_FN3: begin // adder output
+        rd_data_reg <= adder_out_reg;
+      end
+      XOR_FN3, XORI_FN3, OR_FN3, ORI_FN3, AND_FN3, ANDI_FN3: begin // logic unit output
+        rd_data_reg <= logicComb_out_reg;
+      end
+      SLL_FN3, SLLI_FN3, SR_FN3, SRI_FN3: begin // shifter output
+        rd_data_reg <= shifter_out_reg;
+      end
+      SLT_FN3, SLTI_FN3, SLTU_FN3, SLTIU_FN3: begin // comparator output
+        rd_data_reg <= comp_out_reg;
+      end
+      default: ;
+    endcase
+  end
 
+  always @(funct3) begin : comparator_sign
+    if (funct3 == SLTU_FN3 || funct3 == SLTIU_FN3) begin
+      sign = 0;
+    end else if (funct3 == SLT_FN3 || funct3 == SLTI_FN3) begin
+      sign = 1;
     end
   end
 
@@ -77,15 +101,24 @@ module ALU #(
       .sh_output(shifter_out_reg)
   );
 
-  logicComb # (
-    .DATA_WIDTH(DATA_WIDTH)
-  )
-  logicComb_inst (
-    .clk(clk),
-    .a(rs1_data_reg),
-    .b(rs2_data_reg),
-    .funct3(funct3),
-    .f(logicComb_out_reg)
+  logicComb #(
+      .DATA_WIDTH(DATA_WIDTH)
+  ) logicComb_inst (
+      .clk(clk),
+      .a(rs1_data_reg),
+      .b(rs2_data_reg),
+      .funct3(funct3),
+      .f(logicComb_out_reg)
+  );
+
+  comparator #(
+      .DATA_WIDTH(DATA_WIDTH)
+  ) comparator_inst (
+      .clk(clk),
+      .sign(sign),
+      .a(rs1_data_reg),
+      .b(rs2_data_reg),
+      .res(comp_out_reg)
   );
 
 endmodule
