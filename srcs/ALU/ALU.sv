@@ -20,6 +20,7 @@ module ALU #(
 
 );
 
+
   logic [DATA_WIDTH - 1 : 0] imm_ext = 0;  // sign-extended immediate for arithmetic
   logic [DATA_WIDTH - 1 : 0] rs1_data_reg;  // rs1 hold register
   logic [DATA_WIDTH - 1 : 0] rs2_data_reg;  // rs2 hold register
