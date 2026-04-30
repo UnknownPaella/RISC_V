@@ -7,17 +7,17 @@ module registers #(
 ) (
     input clk,
     input rst,
-    input [DATA_WIDTH - 1 : 0] data,
-    input [REG_ADDR_WIDTH - 1 : 0] reg_wr_addr,
-    input [REG_ADDR_WIDTH - 1 : 0] reg_rd_addr_rs1,
-    input [REG_ADDR_WIDTH - 1 : 0] reg_rd_addr_rs2,
-    output [DATA_WIDTH - 1 : 0] rs1_data,
-    output [DATA_WIDTH - 1 : 0] rs2_data
+    input [DATA_WIDTH - 1 : 0] rd_data, // destination register data
+    input [REG_ADDR_WIDTH - 1 : 0] rd_addr, // destination register address
+    input [REG_ADDR_WIDTH - 1 : 0] rs1_addr, // source register 1 address
+    input [REG_ADDR_WIDTH - 1 : 0] rs2_addr, // source register 2 address
+    output [DATA_WIDTH - 1 : 0] rs1_data, // source register 1 data
+    output [DATA_WIDTH - 1 : 0] rs2_data // source register 2 data
 );
 
   logic [REG_ADDR_WIDTH - 1 : 0] reg_en = 0;
 
-  logic [DATA_WIDTH - 1 : 0] reg_arr [ADDR_WIDTH];
+  logic [DATA_WIDTH - 1 : 0] reg_arr[ADDR_WIDTH];
 
   genvar i;
   generate
@@ -33,7 +33,7 @@ module registers #(
       ) register_inst (
           .clk(clk),
           .rst(rst),
-          .data_in(data_in),
+          .data_in(rd_data),
           .en(reg_en[i]),
           .data_out(reg_arr[i])
       );
@@ -42,7 +42,7 @@ module registers #(
 
   endgenerate
 
-  assign rs1_data = reg_arr[reg_rd_addr_rs1];
-  assign rs2_data = reg_arr[reg_rd_addr_rs2];
+  assign rs1_data = reg_arr[rs1_addr];
+  assign rs2_data = reg_arr[rs2_addr];
 
 endmodule

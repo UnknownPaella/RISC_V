@@ -6,7 +6,6 @@ module memory #(
 ) (
     input clk,
     input rst,
-    input [ADDR_WIDTH - 1 : 0] addr,
     input prog_cnt_en,
     input [ADDR_WIDTH - 1 : 0] imm_addr,
     input imm_wr,

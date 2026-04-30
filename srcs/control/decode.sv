@@ -10,7 +10,12 @@ module decode #(
     input clk,
     input [ADDR_WIDTH - 1 : 0] inst,
     output [REG_ADDR_WIDTH - 1 : 0] rs1_addr,
-    output [REG_ADDR_WIDTH - 1 : 0] rs2_addr
+    output [REG_ADDR_WIDTH - 1 : 0] rs2_addr,
+    output [REG_ADDR_WIDTH - 1 : 0] rd_addr,
+    output [DATA_WIDTH - 1 : 0] imm,
+    output [2 : 0] funct3,
+    output [6 : 0] funct7,
+    output [11 : 0] funct12
 );
 
   localparam bit IMM_START = 31;  // also start of funct7
@@ -34,7 +39,7 @@ module decode #(
   logic [OPCODE_START : OPCODE_END] inst_opcode;
 
   logic [6 : 0] funct7_reg = 0;
-  logic [31 : 0] imm_reg = 0;
+  logic [DATA_WIDTH - 1 : 0] imm_reg = 0;
   logic [4 : 0] rs1_addr_reg = 0;
   logic [4 : 0] rs2_addr_reg = 0;
   logic [4 : 0] rd_addr_reg = 0;
@@ -151,5 +156,12 @@ module decode #(
   end
 
   assign inst_opcode = inst[OPCODE_START : OPCODE_END];
+
+  assign rs1_addr = rs1_addr_reg;
+  assign rs2_addr = rs2_addr_reg;
+  assign rd_addr = rd_addr_reg;
+  assign funct3 = funct3_reg;
+  assign funct7 = funct7_reg;
+  assign imm = imm_reg;
 
 endmodule
