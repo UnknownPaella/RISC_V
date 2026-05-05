@@ -7,14 +7,14 @@ module registers #(
 ) (
     input clk,
     input rst,
-    input [DATA_WIDTH - 1 : 0] rd_data, // destination register data
-    input [REG_ADDR_WIDTH - 1 : 0] rd_addr, // destination register address
-    input [REG_ADDR_WIDTH - 1 : 0] rs1_addr, // source register 1 address
-    input [REG_ADDR_WIDTH - 1 : 0] rs2_addr, // source register 2 address
-    input load,
-    input store,
-    output [DATA_WIDTH - 1 : 0] rs1_data, // source register 1 data
-    output [DATA_WIDTH - 1 : 0] rs2_data // source register 2 data
+    input [DATA_WIDTH - 1 : 0] rd_data,  // destination register data
+    input [REG_ADDR_WIDTH - 1 : 0] rd_addr,  // destination register address
+    input [REG_ADDR_WIDTH - 1 : 0] rs1_addr,  // source register 1 address
+    input [REG_ADDR_WIDTH - 1 : 0] rs2_addr,  // source register 2 address
+    input read,
+    input write,
+    output [DATA_WIDTH - 1 : 0] rs1_data,  // source register 1 data
+    output [DATA_WIDTH - 1 : 0] rs2_data  // source register 2 data
 );
 
   logic [REG_ADDR_WIDTH - 1 : 0] reg_en = 0;
@@ -37,6 +37,8 @@ module registers #(
           .rst(rst),
           .data_in(rd_data),
           .en(reg_en[i]),
+          .write(write),
+          .read(read),
           .data_out(reg_arr[i])
       );
 

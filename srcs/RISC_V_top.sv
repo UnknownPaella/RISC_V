@@ -84,7 +84,7 @@ module RISC_V_top #(
       .enable(enable),
       .ALU_ctrl(ALU_ctrl),
       .use_imm(alu_use_imm),
-      .rd_data(rd_data_reg),
+      .alu_out(rd_data_reg),
       .alu_status(alu_status),
       .done(done)
   );

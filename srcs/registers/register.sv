@@ -8,6 +8,8 @@ module register #(
     input rst,
     input [DATA_WIDTH - 1 : 0] data_in,
     input en,
+    input write,
+    input read,
     output logic [DATA_WIDTH - 1 : 0] data_out
 );
 
@@ -17,11 +19,16 @@ module register #(
     if (rst) begin
       data_tmp <= 0;
     end else if (en) begin
-      data_tmp <= data_in;
+      if (write) begin
+        data_tmp <= data_in;
+      end
+      if (read) begin
+        data_out <= data_tmp;
+      end else begin
+        data_out <= 'Z;
+      end
     end
 
   end
-
-  assign data_out = data_tmp;
 
 endmodule

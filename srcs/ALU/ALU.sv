@@ -15,7 +15,7 @@ module ALU #(
     input enable,
     input [9 : 0] ALU_ctrl,
     input use_imm,
-    output [DATA_WIDTH - 1 : 0] rd_data,
+    output [DATA_WIDTH - 1 : 0] alu_out,
     output alu_status,
     output done
 
@@ -38,7 +38,7 @@ module ALU #(
   logic signComp = 0;
   logic [DATA_WIDTH - 1 : 0] comp_out_reg = 0;
 
-  logic [DATA_WIDTH - 1 : 0] rd_data_reg = 0;
+  logic [DATA_WIDTH - 1 : 0] alu_out_reg = 0;
 
   always_ff @(posedge clk) begin : load_regs
     if (enable) begin
@@ -56,11 +56,11 @@ module ALU #(
           default: addOrSub <= 0;
         endcase
 
-        rd_data_reg <= adder_out_reg;
+        alu_out_reg <= adder_out_reg;
 
       end
       XOR, OR, AND: begin  // logic unit output
-        rd_data_reg <= logicComb_out_reg;
+        alu_out_reg <= logicComb_out_reg;
       end
       SLL, SRL, SRA: begin  // shifter output
         case (ALU_ctrl)
@@ -82,7 +82,7 @@ module ALU #(
           end
         endcase
 
-        rd_data_reg <= shifter_out_reg;
+        alu_out_reg <= shifter_out_reg;
       end
       SLT, SLTU: begin  // comparator output
         case (ALU_ctrl)
@@ -91,7 +91,7 @@ module ALU #(
           default: signComp <= 0;
         endcase
 
-        rd_data_reg <= comp_out_reg;
+        alu_out_reg <= comp_out_reg;
       end
       default: ;
     endcase

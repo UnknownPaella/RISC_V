@@ -18,7 +18,8 @@ module decode #(
     output                          alu_use_imm,
     output                          jmp_imm,
     output                          load_reg,
-    output                          store_reg
+    output                          store_reg,
+    output [    ADDR_WIDTH - 1 : 0] memory_addr
 );
 
   localparam bit IMM_START = 31;  // also start of funct7
@@ -56,6 +57,7 @@ module decode #(
   logic                             load_reg_wire = 0;
   logic                             store_reg_wire = 0;
 
+  logic [       ADDR_WIDTH - 1 : 0] memory_addr_reg = 0;
 
   always_ff @(posedge clk) begin : inst_decode
 
@@ -70,6 +72,7 @@ module decode #(
     jmp_imm_wire     <= 0;
     load_reg_wire    <= 0;
     store_reg_wire   <= 0;
+    memory_addr_reg  <= 0;
 
     case (inst_opcode)
       RV32I_REG: begin  // R-type inst
@@ -102,6 +105,7 @@ module decode #(
         funct7_reg <= ADD_FN7;  // between rs1 and immediate
 
         load_reg_wire <= 1;
+        alu_use_imm_wire <= 1;
       end
       RV32I_STR: begin  // S-type inst
         imm_reg[11 : 5] <= inst[IMM_START : IMM_END];
@@ -116,6 +120,7 @@ module decode #(
         funct7_reg <= ADD_FN7;  // between rs1 and immediate
 
         store_reg_wire <= 1;
+        alu_use_imm_wire <= 1;
       end
       RV32I_BRH: begin  // B-type inst
         imm_reg[12] <= inst[IMM_START];
@@ -157,7 +162,6 @@ module decode #(
         rs1_addr_reg <= inst[RS1_START : RS1_END];
         funct3_reg   <= inst[FN3_START : FN3_END];
         rd_addr_reg  <= inst[RD_START : RD_END];
-
       end
       RV32I_LUI: begin  // U-type inst
         imm_reg[31 : 12] <= inst[IMM_START : FN3_END];
