@@ -1,6 +1,7 @@
 `include "../other/RV_inst_types.sv"
 `include "../other/RV32I_list.sv"
 import RV32I_list::*;
+import ALU_ops::*;
 
 module logicComb #(
     parameter int DATA_WIDTH = 32
@@ -8,7 +9,7 @@ module logicComb #(
     input clk,
     input [DATA_WIDTH - 1 : 0] a,
     input [DATA_WIDTH - 1 : 0] b,
-    input [2 : 0] funct3,
+    input [9 : 0] logicFunct,
     output [DATA_WIDTH - 1 : 0] f
 );
 
@@ -20,10 +21,10 @@ module logicComb #(
   always_ff @(posedge clk) begin
     a_reg <= a;
     b_reg <= b;
-    case (funct3)
-      XOR_FN3: f_reg <= a_reg ^ b_reg;
-      OR_FN3:  f_reg <= a_reg | b_reg;
-      AND_FN3: f_reg <= a_reg & b_reg;
+    case (logicFunct)
+      XOR: f_reg <= a_reg ^ b_reg;
+      OR:  f_reg <= a_reg | b_reg;
+      AND: f_reg <= a_reg & b_reg;
       default: f_reg <= a_reg;
     endcase
 

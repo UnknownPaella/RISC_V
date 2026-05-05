@@ -3,7 +3,7 @@
 module registers #(
     parameter int DATA_WIDTH = 32,
     parameter int ADDR_WIDTH = 32,
-    localparam int REG_ADDR_WIDTH = $clog2(ADDR_WIDTH)
+    parameter int REG_ADDR_WIDTH = 5
 ) (
     input clk,
     input rst,
