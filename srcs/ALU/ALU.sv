@@ -14,6 +14,7 @@ module ALU #(
     input [IMM_WIDTH - 1 : 0] imm,
     input enable,
     input [9 : 0] ALU_ctrl,
+    input use_imm,
     output [DATA_WIDTH - 1 : 0] rd_data,
     output alu_status,
     output done
@@ -39,16 +40,10 @@ module ALU #(
 
   logic [DATA_WIDTH - 1 : 0] rd_data_reg = 0;
 
-  always_ff @(posedge clk) begin : sign_extend_immediate
-    if (enable) begin
-      imm_reg <= imm;
-    end
-  end
-
   always_ff @(posedge clk) begin : load_regs
     if (enable) begin
       rs1_data_reg <= rs1_data;
-      rs2_data_reg <= rs2_data;
+      rs2_data_reg <= use_imm ? imm : rs2_data;
     end
   end
 

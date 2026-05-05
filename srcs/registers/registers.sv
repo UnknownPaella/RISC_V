@@ -11,6 +11,8 @@ module registers #(
     input [REG_ADDR_WIDTH - 1 : 0] rd_addr, // destination register address
     input [REG_ADDR_WIDTH - 1 : 0] rs1_addr, // source register 1 address
     input [REG_ADDR_WIDTH - 1 : 0] rs2_addr, // source register 2 address
+    input load,
+    input store,
     output [DATA_WIDTH - 1 : 0] rs1_data, // source register 1 data
     output [DATA_WIDTH - 1 : 0] rs2_data // source register 2 data
 );

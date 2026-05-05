@@ -16,7 +16,9 @@ module decode #(
     output [    DATA_WIDTH - 1 : 0] imm,
     output [                 9 : 0] ALU_ctrl,
     output                          alu_use_imm,
-    output                          jmp_imm
+    output                          jmp_imm,
+    output                          load_reg,
+    output                          store_reg
 );
 
   localparam bit IMM_START = 31;  // also start of funct7
@@ -51,18 +53,23 @@ module decode #(
   logic                             alu_use_imm_wire = 0;
   logic                             jmp_imm_wire = 0;
 
+  logic                             load_reg_wire = 0;
+  logic                             store_reg_wire = 0;
+
 
   always_ff @(posedge clk) begin : inst_decode
 
-    funct7_reg    <= 0;
-    rs2_addr_reg  <= 0;
-    rs1_addr_reg  <= 0;
-    funct3_reg    <= 0;
-    rd_addr_reg   <= 0;
-    imm_reg       <= 0;
-    ALU_ctrl_wire <= 0;
-    alu_use_imm   <= 0;
-    jmp_imm       <= 0;
+    funct7_reg       <= 0;
+    rs2_addr_reg     <= 0;
+    rs1_addr_reg     <= 0;
+    funct3_reg       <= 0;
+    rd_addr_reg      <= 0;
+    imm_reg          <= 0;
+    ALU_ctrl_wire    <= 0;
+    alu_use_imm_wire <= 0;
+    jmp_imm_wire     <= 0;
+    load_reg_wire    <= 0;
+    store_reg_wire   <= 0;
 
     case (inst_opcode)
       RV32I_REG: begin  // R-type inst
@@ -81,7 +88,7 @@ module decode #(
 
         imm_reg[31 : 12] <= {(31 - 12 + 1) {inst[31]}};  // sign extension
 
-        alu_use_imm <= 1;
+        alu_use_imm_wire <= 1;
       end
       RV32I_LDR: begin  // I-type inst
         imm_reg[11 : 0] <= inst[IMM_START : RS2_END];
@@ -90,6 +97,11 @@ module decode #(
         rd_addr_reg <= inst[RD_START : RD_END];
 
         imm_reg[31 : 12] <= {(31 - 12 + 1) {inst[31]}};
+
+        funct3_reg <= ADDSUB_FN3;  // leverage ALU to perform address adding
+        funct7_reg <= ADD_FN7;  // between rs1 and immediate
+
+        load_reg_wire <= 1;
       end
       RV32I_STR: begin  // S-type inst
         imm_reg[11 : 5] <= inst[IMM_START : IMM_END];
@@ -99,6 +111,11 @@ module decode #(
         imm_reg[4 : 0] <= inst[RD_START : RD_END];
 
         imm_reg[31 : 12] <= {(31 - 12 + 1) {inst[31]}};
+
+        funct3_reg <= ADDSUB_FN3;  // leverage ALU to perform address adding
+        funct7_reg <= ADD_FN7;  // between rs1 and immediate
+
+        store_reg_wire <= 1;
       end
       RV32I_BRH: begin  // B-type inst
         imm_reg[12] <= inst[IMM_START];
@@ -128,8 +145,12 @@ module decode #(
         funct3_reg <= inst[FN3_START : FN3_END];
         rd_addr_reg <= inst[RD_START : RD_END];
 
+        funct3_reg <= ADDSUB_FN3;  // leverage ALU to perform address adding
+        funct7_reg <= ADD_FN7;  // between rs1 and immediate
+
         imm_reg[31 : 12] <= {(31 - 12 + 1) {inst[31]}};
-        jmp_imm <= 1;
+        alu_use_imm_wire <= 1;
+        jmp_imm_wire <= 1;
       end
       RV32I_ENV: begin  // I-type inst
         funct12_reg  <= inst[IMM_START : RS2_END];
@@ -186,7 +207,7 @@ module decode #(
       SLTU_FN3: begin  // comparator output
         ALU_ctrl_wire <= SLTU;
       end
-      default: ;
+      default: ALU_ctrl_wire <= ADD;
     endcase
   end
 
@@ -202,5 +223,7 @@ module decode #(
   assign ALU_ctrl = ALU_ctrl_wire;
   assign alu_use_imm = alu_use_imm_wire;
   assign jmp_imm = jmp_imm_wire;
+  assign load_reg = load_reg_wire;
+  assign store_reg = store_reg_wire;
 
 endmodule

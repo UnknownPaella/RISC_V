@@ -20,9 +20,11 @@ module RISC_V_top #(
   logic [DATA_WIDTH - 1 : 0] rs1_data;
   logic [DATA_WIDTH - 1 : 0] rs2_data;
   logic [DATA_WIDTH - 1 : 0] rd_data;
+  logic [DATA_WIDTH - 1 : 0] rd_data_reg;
 
   logic [2 : 0] funct3;
   logic [6 : 0] funct7;
+
 
   memory #(
       .DATA_WIDTH(DATA_WIDTH),
@@ -36,21 +38,22 @@ module RISC_V_top #(
       .inst_out(inst)
   );
 
-  control # (
-    .DATA_WIDTH(DATA_WIDTH),
-    .ADDR_WIDTH(ADDR_WIDTH),
-    .REG_ADDR_WIDTH(REG_ADDR_WIDTH)
-  )
-  control_inst (
-    .clk(clk),
-    .inst(inst),
-    .rs1_addr(rs1_addr),
-    .rs2_addr(rs2_addr),
-    .rd_addr(rd_addr),
-    .imm(imm),
-    .ALU_ctrl(ALU_ctrl),
-    .alu_use_imm(alu_use_imm),
-    .jmp_imm(jmp_imm)
+  decode #(
+      .DATA_WIDTH(DATA_WIDTH),
+      .ADDR_WIDTH(ADDR_WIDTH),
+      .REG_ADDR_WIDTH(REG_ADDR_WIDTH)
+  ) decode_inst (
+      .clk(clk),
+      .inst(inst),
+      .rs1_addr(rs1_addr),
+      .rs2_addr(rs2_addr),
+      .rd_addr(rd_addr),
+      .imm(imm),
+      .ALU_ctrl(ALU_ctrl),
+      .alu_use_imm(alu_use_imm),
+      .jmp_imm(jmp_imm),
+      .load_reg(load_reg),
+      .store_reg(store_reg)
   );
 
   registers #(
@@ -79,9 +82,9 @@ module RISC_V_top #(
       .rs2_data(rs2_data),
       .imm(imm),
       .enable(enable),
-      .funct3(funct3),
-      .subOrSra(subOrSra),
-      .rd_data(rd_data),
+      .ALU_ctrl(ALU_ctrl),
+      .use_imm(alu_use_imm),
+      .rd_data(rd_data_reg),
       .alu_status(alu_status),
       .done(done)
   );
