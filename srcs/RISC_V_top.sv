@@ -1,7 +1,16 @@
 
+`include "./other/RV32I_list.sv"
+import RV32I_list::*;
 
-module RISC_V_top (
-    input clk
+
+module RISC_V_top #(
+    parameter int DATA_WIDTH = 32,
+    parameter int ADDR_WIDTH = 32,
+    parameter int IMM_WIDTH = 12,
+    localparam int REG_ADDR_WIDTH = $clog2(ADDR_WIDTH)
+) (
+    input clk,
+    input rst
 );
 
   memory #(
@@ -11,7 +20,7 @@ module RISC_V_top (
       .clk(clk),
       .rst(rst),
       .prog_cnt_en(prog_cnt_en),
-      .imm_addr(imm_addr),
+      .imm_addr(imm),
       .imm_wr(imm_wr),
       .inst_out(inst_out)
   );

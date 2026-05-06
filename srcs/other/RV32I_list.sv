@@ -1,7 +1,4 @@
 
-`include "./RV_inst_types.sv"
-import RV_inst_types::*;
-
 package RV32I_list;
 
   // RV32I opcodes
@@ -47,9 +44,9 @@ package RV32I_list;
   parameter bit SLTI_FN3 = 3'b010;  // Set Less Than immediate
   parameter bit SLTIU_FN3 = 3'b011;  // Set Less Than immediate (Unsigned)
 
-  parameter bit SLL_FN7 = 7'b0000000;  // Shift Left Logical immediate
-  parameter bit SRL_FN7 = 7'b0000000;  // Shift Right Logical immediate
-  parameter bit SRA_FN7 = 7'b0100000;  // Shift Right Arithmetic immediate
+  parameter bit SLLI_FN7 = 7'b0000000;  // Shift Left Logical immediate
+  parameter bit SRLI_FN7 = 7'b0000000;  // Shift Right Logical immediate
+  parameter bit SRAI_FN7 = 7'b0100000;  // Shift Right Arithmetic immediate
 
   // RV32I_LDR
   parameter bit LBS_FN3 = 3'b000;  // Load Byte (signed)

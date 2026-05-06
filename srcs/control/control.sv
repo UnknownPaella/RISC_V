@@ -1,4 +1,4 @@
-import RV32I_list::*;
+// import RV32I_list::*;
 
 module control #(
     parameter int DATA_WIDTH = 32,

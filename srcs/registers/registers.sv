@@ -1,4 +1,4 @@
-
+`include "./register.sv"
 
 module registers #(
     parameter int DATA_WIDTH = 32,
@@ -25,7 +25,7 @@ module registers #(
     for (i = 0; i < ADDR_WIDTH; i++) begin : g_register_array
 
       // contents of x0 register is fixed to zeroes
-      assign reg_en[i] = i == 0 ? 0 : (reg_wr_addr == i);
+      assign reg_en[i] = i == 0 ? 0 : (rd_addr == i);
 
       register #(
           .DATA_WIDTH(DATA_WIDTH),

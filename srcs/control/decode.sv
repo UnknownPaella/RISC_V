@@ -1,5 +1,4 @@
-
-import RV_inst_types::*;
+`include "../other/RV32I_list.sv"
 import RV32I_list::*;
 
 module decode #(
@@ -50,7 +49,7 @@ module decode #(
   always_ff @(posedge clk) begin : inst_decode
     case (inst_opcode)
       RV32I_REG: begin  // R-type inst
-        funct7 <= inst[IMM_START : IMM_END];
+        funct7_reg <= inst[IMM_START : IMM_END];
         rs2_addr_reg <= inst[RS2_START : RS2_END];
         rs1_addr_reg <= inst[RS1_START : RS1_END];
         funct3_reg <= inst[FN3_START : FN3_END];
@@ -65,7 +64,7 @@ module decode #(
         rd_addr_reg <= inst[RD_START : RD_END];
 
         rs2_addr_reg <= 0;
-        funct7 <= 0;
+        funct7_reg <= 0;
 
         imm_reg[31 : 12] <= {(31 - 12 + 1){inst[31]}};
       end
@@ -76,7 +75,7 @@ module decode #(
         rd_addr_reg <= inst[RD_START : RD_END];
 
         rs2_addr_reg <= 0;
-        funct7 <= 0;
+        funct7_reg <= 0;
 
         imm_reg[31 : 12] <= {(31 - 12 + 1){inst[31]}};
       end
@@ -88,7 +87,7 @@ module decode #(
         imm_reg[4 : 0] <= inst[RD_START : RD_END];
 
         rd_addr_reg <= 0;
-        funct7 <= 0;
+        funct7_reg <= 0;
 
         imm_reg[31 : 12] <= {(31 - 12 + 1){inst[31]}};
       end
@@ -103,7 +102,7 @@ module decode #(
         imm_reg[0] <= 0;
 
         rd_addr_reg <= 0;
-        funct7 <= 0;
+        funct7_reg <= 0;
 
         imm_reg[31 : 13] <= {(31 - 13 + 1){inst[31]}};
       end
@@ -115,7 +114,7 @@ module decode #(
         rd_addr_reg <= inst[RD_START : RD_END];
         imm_reg[0] <= 0;
 
-        funct7 <= 0;
+        funct7_reg <= 0;
         rs2_addr_reg <= 0;
         rs1_addr_reg <= 0;
         funct3_reg <= 0;
@@ -129,7 +128,7 @@ module decode #(
         rd_addr_reg <= inst[RD_START : RD_END];
 
         rs2_addr_reg <= 0;
-        funct7 <= 0;
+        funct7_reg <= 0;
 
         imm_reg[31 : 12] <= {(31 - 12 + 1){inst[31]}};
       end

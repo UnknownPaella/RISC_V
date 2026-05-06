@@ -1,4 +1,5 @@
 
+`include "../other/RV32I_list.sv"
 import RV32I_list::*;
 
 module ALU #(
@@ -20,10 +21,10 @@ module ALU #(
 
 );
 
-  logic [DATA_WIDTH - 1 : 0] imm_reg = 0;  // sign-extended immediate for arithmetic
+  logic [IMM_WIDTH - 1 : 0] imm_reg = 0;  // sign-extended immediate for arithmetic
   logic [DATA_WIDTH - 1 : 0] rs1_data_reg;  // rs1 hold register
   logic [DATA_WIDTH - 1 : 0] rs2_data_reg;  // rs2 hold register
-  logic [DATA_WIDTH - 1 : 0] addr_out_reg;  // adder output register
+  logic [DATA_WIDTH - 1 : 0] adder_out_reg;  // adder output register
 
   logic shift_dir = 0;
   logic [4 : 0] shamt = 0;
@@ -38,7 +39,7 @@ module ALU #(
 
   always_ff @(posedge clk) begin : sign_extend_immediate
     if (enable) begin
-      imm_reg <= imm;
+      imm_reg <= imm[IMM_WIDTH - 1 : 0];
     end
   end
 
@@ -69,9 +70,9 @@ module ALU #(
 
   always @(funct3) begin : comparator_sign
     if (funct3 == SLTU_FN3 || funct3 == SLTIU_FN3) begin
-      sign = 0;
+      signComp = 0;
     end else if (funct3 == SLT_FN3 || funct3 == SLTI_FN3) begin
-      sign = 1;
+      signComp = 1;
     end
   end
 
@@ -114,7 +115,7 @@ module ALU #(
       .DATA_WIDTH(DATA_WIDTH)
   ) comparator_inst (
       .clk(clk),
-      .sign(sign),
+      .signComp(signComp),
       .a(rs1_data_reg),
       .b(rs2_data_reg),
       .res(comp_out_reg)
