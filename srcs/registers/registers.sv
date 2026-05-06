@@ -3,16 +3,18 @@
 module registers #(
     parameter int DATA_WIDTH = 32,
     parameter int ADDR_WIDTH = 32,
-    localparam int REG_ADDR_WIDTH = $clog2(ADDR_WIDTH)
+    parameter int REG_ADDR_WIDTH = 5
 ) (
     input clk,
     input rst,
-    input [DATA_WIDTH - 1 : 0] rd_data, // destination register data
-    input [REG_ADDR_WIDTH - 1 : 0] rd_addr, // destination register address
-    input [REG_ADDR_WIDTH - 1 : 0] rs1_addr, // source register 1 address
-    input [REG_ADDR_WIDTH - 1 : 0] rs2_addr, // source register 2 address
-    output [DATA_WIDTH - 1 : 0] rs1_data, // source register 1 data
-    output [DATA_WIDTH - 1 : 0] rs2_data // source register 2 data
+    input [DATA_WIDTH - 1 : 0] rd_data,  // destination register data
+    input [REG_ADDR_WIDTH - 1 : 0] rd_addr,  // destination register address
+    input [REG_ADDR_WIDTH - 1 : 0] rs1_addr,  // source register 1 address
+    input [REG_ADDR_WIDTH - 1 : 0] rs2_addr,  // source register 2 address
+    input read,
+    input write,
+    output [DATA_WIDTH - 1 : 0] rs1_data,  // source register 1 data
+    output [DATA_WIDTH - 1 : 0] rs2_data  // source register 2 data
 );
 
   logic [REG_ADDR_WIDTH - 1 : 0] reg_en = 0;
@@ -35,6 +37,8 @@ module registers #(
           .rst(rst),
           .data_in(rd_data),
           .en(reg_en[i]),
+          .write(write),
+          .read(read),
           .data_out(reg_arr[i])
       );
 

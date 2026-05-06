@@ -24,7 +24,7 @@ module memory #(
       PC <= 0;
     end else begin
       if (imm_wr) begin
-        PC <= imm_addr;
+        PC <= PC + imm_addr; // jumps all use PC-relative addressing
       end else if (prog_cnt_en) begin
         PC <= PC + 1;
       end

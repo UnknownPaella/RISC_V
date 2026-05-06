@@ -1,21 +1,23 @@
 
 `include "../other/RV32I_list.sv"
+`include "../other/ALU_ops.sv"
 import RV32I_list::*;
+import ALU_ops::*;
 
 module ALU #(
     parameter int DATA_WIDTH = 32,
     parameter int ADDR_WIDTH = 32,
-    parameter int IMM_WIDTH = 12,
-    localparam int REG_ADDR_WIDTH = $clog2(ADDR_WIDTH)
+    parameter int IMM_WIDTH = 32,
+    parameter int REG_ADDR_WIDTH = 5
 ) (
     input clk,
     input [DATA_WIDTH - 1 : 0] rs1_data,
     input [DATA_WIDTH - 1 : 0] rs2_data,
     input [IMM_WIDTH - 1 : 0] imm,
     input enable,
-    input [2 : 0] funct3,
-    input subOrSra,
-    output [DATA_WIDTH - 1 : 0] rd_data,
+    input [9 : 0] ALU_ctrl,
+    input use_imm,
+    output [DATA_WIDTH - 1 : 0] alu_out,
     output alu_status,
     output done
 
@@ -26,7 +28,10 @@ module ALU #(
   logic [DATA_WIDTH - 1 : 0] rs2_data_reg;  // rs2 hold register
   logic [DATA_WIDTH - 1 : 0] adder_out_reg;  // adder output register
 
+  logic addOrSub = 0;
+
   logic shift_dir = 0;
+  logic shift_logicOrArith = 0;
   logic [4 : 0] shamt = 0;
   logic [DATA_WIDTH - 1 : 0] shifter_out_reg = 0;
 
@@ -35,45 +40,63 @@ module ALU #(
   logic signComp = 0;
   logic [DATA_WIDTH - 1 : 0] comp_out_reg = 0;
 
-  logic [DATA_WIDTH - 1 : 0] rd_data_reg = 0;
-
-  always_ff @(posedge clk) begin : sign_extend_immediate
-    if (enable) begin
-      imm_reg <= imm[IMM_WIDTH - 1 : 0];
-    end
-  end
+  logic [DATA_WIDTH - 1 : 0] alu_out_reg = 0;
 
   always_ff @(posedge clk) begin : load_regs
     if (enable) begin
       rs1_data_reg <= rs1_data;
-      rs2_data_reg <= rs2_data;
+      rs2_data_reg <= use_imm ? imm : rs2_data;
     end
   end
 
-  always_ff @(posedge clk) begin : blockName
-    case (funct3)
-      ADDSUB_FN3, ADDSUBI_FN3: begin  // adder output
-        rd_data_reg <= adder_out_reg;
+  always @(ALU_ctrl) begin : ALU_decode
+    case (ALU_ctrl)
+      ADD, SUB: begin  // adder output
+        case (ALU_ctrl)
+          ADD: addOrSub <= 0;
+          SUB: addOrSub <= 1;
+          default: addOrSub <= 0;
+        endcase
+
+        alu_out_reg <= adder_out_reg;
+
       end
-      XOR_FN3, XORI_FN3, OR_FN3, ORI_FN3, AND_FN3, ANDI_FN3: begin  // logic unit output
-        rd_data_reg <= logicComb_out_reg;
+      XOR, OR, AND: begin  // logic unit output
+        alu_out_reg <= logicComb_out_reg;
       end
-      SLL_FN3, SLLI_FN3, SR_FN3, SRI_FN3: begin  // shifter output
-        rd_data_reg <= shifter_out_reg;
+      SLL, SRL, SRA: begin  // shifter output
+        case (ALU_ctrl)
+          SLL: begin
+            shift_dir <= 0;
+            shift_logicOrArith <= 0;
+          end
+          SRL: begin
+            shift_dir <= 1;
+            shift_logicOrArith <= 0;
+          end
+          SRA: begin
+            shift_dir <= 1;
+            shift_logicOrArith <= 1;
+          end
+          default: begin
+            shift_dir <= 0;
+            shift_logicOrArith <= 0;
+          end
+        endcase
+
+        alu_out_reg <= shifter_out_reg;
       end
-      SLT_FN3, SLTI_FN3, SLTU_FN3, SLTIU_FN3: begin  // comparator output
-        rd_data_reg <= comp_out_reg;
+      SLT, SLTU: begin  // comparator output
+        case (ALU_ctrl)
+          SLT: signComp <= 0;
+          SLTU: signComp <= 1;
+          default: signComp <= 0;
+        endcase
+
+        alu_out_reg <= comp_out_reg;
       end
       default: ;
     endcase
-  end
-
-  always @(funct3) begin : comparator_sign
-    if (funct3 == SLTU_FN3 || funct3 == SLTIU_FN3) begin
-      signComp = 0;
-    end else if (funct3 == SLT_FN3 || funct3 == SLTI_FN3) begin
-      signComp = 1;
-    end
   end
 
   // adding and subtracting module
@@ -84,7 +107,7 @@ module ALU #(
       .clk(clk),
       .a(rs1_data_reg),
       .b(rs2_data_reg),
-      .addOrSub(subOrSra),
+      .addOrSub(addOrSub),
       .f(adder_out_reg)
   );
 
@@ -95,7 +118,7 @@ module ALU #(
   ) shifter_inst (
       .clk(clk),
       .shift_dir(shift_dir),
-      .logicOrArith(subOrSra),
+      .logicOrArith(shift_logicOrArith),
       .shamt(shamt),
       .sh_data(rs1_data_reg),
       .sh_output(shifter_out_reg)
@@ -107,7 +130,7 @@ module ALU #(
       .clk(clk),
       .a(rs1_data_reg),
       .b(rs2_data_reg),
-      .funct3(funct3),
+      .logicFunct(ALU_ctrl),
       .f(logicComb_out_reg)
   );
 
@@ -115,7 +138,7 @@ module ALU #(
       .DATA_WIDTH(DATA_WIDTH)
   ) comparator_inst (
       .clk(clk),
-      .signComp(signComp),
+      .sign(signComp),
       .a(rs1_data_reg),
       .b(rs2_data_reg),
       .res(comp_out_reg)
